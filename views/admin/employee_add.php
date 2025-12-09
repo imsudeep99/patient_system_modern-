@@ -1,3 +1,6 @@
+<!-- show password -->
+<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="/patient_system_modern/assets/js/main.js"></script>
 <?php
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../helpers.php';
@@ -24,6 +27,19 @@ $content = <<<HTML
                     <label class="form-label">Password</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>
+                <!-- show password -->
+               <!-- <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" name="password" id="password" class="form-control" required>
+
+                        <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                            <i class="fa-solid fa-eye" id="toggleIcon"></i>
+                        </span>
+                    </div>
+                </div> -->
+
+
                 <div class="col-md-6">
                     <label class="form-label">Role</label>
                     <select name="role" class="form-select" required>

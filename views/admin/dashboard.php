@@ -13,6 +13,15 @@ $totalReferrers = $pdo->query('SELECT COUNT(*) AS c FROM referrers')->fetch()['c
 $totalEmployees = $pdo->query("SELECT COUNT(*) AS c FROM users WHERE role = 'employee'")->fetch()['c'] ?? 0;
 
 $content = <<<HTML
+<!-- <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Patients</h3>
+
+    <a href="/patient_system_modern/controllers/export_patients.php" 
+       class="btn btn-sm btn-outline-secondary">
+        Download CSV
+    </a>
+</div> -->
+
 <div class="row g-3">
     <div class="col-md-4">
         <div class="card stat-card">
@@ -23,6 +32,9 @@ $content = <<<HTML
                 </div>
                 <div class="stat-icon bg-primary-subtle">
                     <i class="bi bi-person-lines-fill"></i>
+                    <!-- <a class="nav-link active" href="/patient_system_modern/views/patients/index.php">
+                    <i class="bi bi-person-lines-fill"></i>  -->
+                </a>
                 </div>
             </div>
         </div>

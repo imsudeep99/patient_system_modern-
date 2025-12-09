@@ -1,3 +1,10 @@
+<style>
+    .btn-primary:hover {
+    background-color: #013063ff !important; /* your hover bg color */
+    border-color: #004a99 !important;     /* optional border color */
+}
+
+</style>
 <?php
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/../../helpers.php';
@@ -7,13 +14,60 @@ require_login();
 $page_title = 'Patients';
 $active = 'patients';
 
-$stmt = $pdo->query('SELECT p.*, r.name AS referrer_name, r.type AS referrer_type FROM patients p 
-    LEFT JOIN referrers r ON p.referred_by_id = r.id ORDER BY p.created_at DESC');
+/*
+   FETCH REFERRERS FOR FILTER
+ */
+$referrerList = $pdo->query("SELECT id, name, type FROM referrers ORDER BY name")->fetchAll();
+
+/*
+   APPLY FILTERS
+ */
+$where = [];
+$params = [];
+
+// Search (name/contact)
+if (!empty($_GET['search'])) {
+    $where[] = "(p.name LIKE :search1 OR p.contact LIKE :search2)";
+    $params[':search1'] = "%".$_GET['search']."%";
+    $params[':search2'] = "%".$_GET['search']."%";
+}
+
+// Date Filter
+if (!empty($_GET['date'])) {
+    $where[] = "DATE(p.created_at) = :date";
+    $params[':date'] = $_GET['date'];
+}
+
+// Referrer Filter
+if (!empty($_GET['referrer'])) {
+    $where[] = "p.referred_by_id = :ref";
+    $params[':ref'] = $_GET['referrer'];
+}
+
+$sql = "SELECT p.*, r.name AS referrer_name, r.type AS referrer_type 
+        FROM patients p 
+        LEFT JOIN referrers r ON p.referred_by_id = r.id";
+
+if ($where) {
+    $sql .= " WHERE ".implode(" AND ", $where);
+}
+
+$sql .= " ORDER BY p.created_at DESC";
+
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $patients = $stmt->fetchAll();
 
+
+/*
+   TABLE ROWS
+ */
 $rows = '';
 foreach ($patients as $p) {
-    $ref = $p['referrer_name'] ? $p['referrer_name'] . ' (' . strtoupper($p['referrer_type']) . ')' : '-';
+    $ref = $p['referrer_name']
+        ? $p['referrer_name'].' ('.strtoupper($p['referrer_type']).')'
+        : '-';
+
     $rows .= '<tr>
         <td>'.htmlspecialchars($p['name']).'</td>
         <td>'.htmlspecialchars($p['age']).'</td>
@@ -21,17 +75,88 @@ foreach ($patients as $p) {
         <td>'.htmlspecialchars($p['contact']).'</td>
         <td>'.htmlspecialchars($ref).'</td>
         <td>'.htmlspecialchars($p['fees']).'</td>
-        <td>'.htmlspecialchars(date('d-m-Y', strtotime($p['created_at']))).'</td>
+        <td>'.htmlspecialchars(date("d-m-Y", strtotime($p['created_at']))).'</td>
     </tr>';
 }
 
+/*
+   BUILD FILTER VALUES & OPTIONS
+ */
+$searchValue = htmlspecialchars($_GET['search'] ?? '', ENT_QUOTES, 'UTF-8');
+$dateValue   = htmlspecialchars($_GET['date'] ?? '', ENT_QUOTES, 'UTF-8');
+
+$referrerOptions = '<option value="">All Referrers</option>';
+$currentRef = $_GET['referrer'] ?? '';
+
+foreach ($referrerList as $r) {
+    $id       = (int)$r['id'];
+    $selected = ($currentRef !== '' && (string)$currentRef === (string)$id) ? 'selected' : '';
+    $name     = htmlspecialchars($r['name'], ENT_QUOTES, 'UTF-8');
+    $type     = strtoupper($r['type']);
+
+    $referrerOptions .= "<option value=\"{$id}\" {$selected}>{$name} ({$type})</option>";
+}
+
+/*
+   PAGE CONTENT (HEREDOC)
+ */
 $content = <<<HTML
 <div class="d-flex justify-content-between align-items-center mb-3">
+    
     <h6 class="mb-0">Patient List</h6>
-    <a href="/patient_system_modern/views/patients/add.php" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus"></i> Add Patient
-    </a>
+
+    <div class="d-flex gap-2">
+        <a href="/patient_system_modern/views/patients/add.php" 
+           class="btn btn-primary btn-sm">
+            <i class="bi bi-plus"></i> Add Patient
+        </a>
+
+        <a href="/patient_system_modern/controllers/export_patients.php" 
+          
+           class="btn btn-primary btn-sm">
+            Download CSV
+        </a>
+    </div>
+
 </div>
+
+
+<!-- <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Patients</h3>
+
+    <a href="/patient_system_modern/controllers/export_patients.php" 
+       class="btn btn-sm btn-outline-secondary">
+        Download CSV
+    </a>
+</div> -->
+
+
+<form method="GET" class="card p-3 mb-3">
+    <div class="row g-2">
+
+        <div class="col-md-4">
+            <input type="text" name="search" class="form-control"
+                placeholder="Search by Name or Contact"
+                value="{$searchValue}">
+        </div>
+
+        <div class="col-md-3">
+            <input type="date" name="date" class="form-control"
+                value="{$dateValue}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="referrer" class="form-control">
+                {$referrerOptions}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filter</button>
+        </div>
+    </div>
+</form>
+
 <div class="card shadow-sm">
     <div class="card-body">
         <div class="table-responsive">
