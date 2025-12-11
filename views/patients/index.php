@@ -93,10 +93,10 @@ foreach ($patients as $p) {
             <a href="/patient_system_modern/views/patients/view_patient.php?id='.$p['id'].'" 
                class="btn btn-sm btn-primary">View</a>
 
-            <a href="/patient_system_modern/views/patients//edit_patient.php?id='.$p['id'].'" 
+            <a href="/patient_system_modern/views/patients/edit_patient.php?id='.$p['id'].'" 
                class="btn btn-sm btn-warning">Edit</a>
 
-            <a href="/patient_system_modern/views/patients//delete_patient.php?id='.$p['id'].'" 
+            <a href="/patient_system_modern/views/patients/delete_patient.php?id='.$p['id'].'" 
                class="btn btn-sm btn-danger"
                onclick="return confirm(\'Are you sure?\');">
                Delete

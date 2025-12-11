@@ -18,6 +18,19 @@ foreach ($employees as $e) {
                 <td>'.htmlspecialchars($e['email']).'</td>
                 <td>'.htmlspecialchars($e['role']).'</td>
                 <td>'.htmlspecialchars(date("d-m-Y", strtotime($e["created_at"]))).'</td>
+                <td>
+                    <a href="/patient_system_modern/views/admin/employee_view.php?id='.$e['id'].'" 
+                    class="btn btn-sm btn-primary">View</a>
+
+                    <a href="/patient_system_modern/views/admin/employee_edit.php?id='.$e['id'].'" 
+                    class="btn btn-sm btn-warning">Edit</a>
+
+                    <a href="/patient_system_modern/views/admin/employee_delete.php?id='.$e['id'].'" 
+                    class="btn btn-sm btn-danger"
+                    onclick="return confirm(\'Are you sure?\');">
+                    Delete
+                    </a>
+                </td>
               </tr>';
 }
 
@@ -37,7 +50,8 @@ $content = <<<HTML
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
-                    <th>Created At</th>
+                    <th>Date</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
